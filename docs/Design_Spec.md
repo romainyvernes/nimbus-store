@@ -35,15 +35,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 ## 3️⃣ High-Level Architecture
 
-```
-Client
-  │
-  ▼
-Metadata Service
-  │
-  ▼
-Storage Nodes
-```
+![Architecture diagram.png](./Architecture%20diagram.png)
 
 **Components:**
 - **Client API:** Handles file uploads/downloads, communicates with Metadata Service.
