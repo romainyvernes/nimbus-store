@@ -1,13 +1,13 @@
-package com.nimbusstore;
+package com.nimbusstore.metadata;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NimbusStoreApplication {
+public class MetadataApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NimbusStoreApplication.class, args);
+		SpringApplication.run(MetadataApplication.class, args);
 	}
 
 }
