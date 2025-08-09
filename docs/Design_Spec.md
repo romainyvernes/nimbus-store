@@ -51,6 +51,10 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 ## 4️⃣ Data Model
 
+**DTO Usage:**  
+- All API endpoints must use Data Transfer Objects (DTOs) for both requests and responses, rather than exposing internal entity classes directly.
+- Mapping between entities and DTOs should be handled in the service layer or via a dedicated mapper component to ensure separation of concerns and API stability.
+
 **Database Schema (Metadata Service):**
 
 | Table   | Fields                               | Description                         |
@@ -72,17 +76,17 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 ## 6️⃣ API Endpoints (Phase 1 MVP)
 
-- `POST /files/upload`  
+- `POST /files`  
   *Upload a file.*
 
-  **Request (multipart/form-data):**
+  **Request (multipart/form-data, uses DTO):**
   ```json
   {
     "file": "<binary>"
   }
   ```
 
-  **Response:**
+  **Response (DTO):**
   ```json
   {
     "fileId": "abc123",
@@ -90,26 +94,36 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   }
   ```
 
-- `GET /files/download/{fileId}`  
+- `GET /files/{fileId}`  
   *Download a file.*
 
   **Response:**  
   Binary file stream.
 
-- `GET /files`  
-  *List all files.*
 
-  **Response:**
+- `PATCH /files/{id}/status`  
+  *Update file status.*
+
+  **Request (DTO):**
   ```json
-  [
-    {
-      "fileId": "abc123",
-      "filename": "example.txt",
-      "createdAt": "2025-07-31T12:00:00Z"
-    }
-    // ...more files...
-  ]
+  {
+    "status": "archived"
+  }
   ```
+  **Response:**  
+  Returns only an appropriate HTTP status code (e.g., `204 No Content`). The updated entity is not returned.
+
+- `PATCH /chunks/{id}/status`  
+  *Update chunk status.*
+
+  **Request (DTO):**
+  ```json
+  {
+    "status": "replicated"
+  }
+  ```
+  **Response:**  
+  Returns only an appropriate HTTP status code (e.g., `204 No Content`). The updated entity is not returned.
 
 - `GET /health`  
   *Node/cluster status.*
@@ -137,6 +151,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 ## 8️⃣ Trade-Offs and Design Choices
 
+- **DTOs:** All API endpoints use DTOs for input/output. Entities are mapped to DTOs in the service layer or with a dedicated mapper.
 - **Consistency:** Eventual consistency for simplicity and speed.
 - **API:** REST initially for rapid development; gRPC for future efficiency.
 - **Tech Stack:** Java + Spring Boot for fast iteration and industry alignment.
