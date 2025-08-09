@@ -1,7 +1,9 @@
 package com.nimbusstore.metadata.controller;
 
+import com.nimbusstore.dto.ChunkMetadataDTO;
 import com.nimbusstore.metadata.model.ChunkMetadata;
 import com.nimbusstore.metadata.service.ChunkService;
+import com.nimbusstore.metadata.mapper.ChunkMetadataMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,26 +12,28 @@ import org.springframework.web.bind.annotation.*;
 public class ChunkController {
 
     private final ChunkService service;
+    private final ChunkMetadataMapper mapper;
 
-    public ChunkController(ChunkService service) {
+    public ChunkController(ChunkService service, ChunkMetadataMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
-    // TODO: replace ChunkMetadata with a DTO for better separation of concerns
     @PostMapping("/file/{fileId}")
-    public ResponseEntity<ChunkMetadata> uploadChunk(
+    public ResponseEntity<ChunkMetadataDTO> uploadChunk(
             @PathVariable Long fileId,
-            @RequestBody ChunkMetadata chunk) {
+            @RequestBody ChunkMetadataDTO chunkDto) {
+        ChunkMetadata chunk = mapper.toEntity(chunkDto);
         chunk.setFileId(fileId);
         ChunkMetadata saved = service.save(chunk);
-        return ResponseEntity.ok(saved);
+        ChunkMetadataDTO savedDto = mapper.toDto(saved);
+        return ResponseEntity.ok(savedDto);
     }
 
-    // TODO: replace ChunkMetadata with a DTO for better separation of concerns
     @GetMapping("/{id}")
-    public ResponseEntity<ChunkMetadata> getChunk(@PathVariable Long id) {
+    public ResponseEntity<ChunkMetadataDTO> getChunk(@PathVariable Long id) {
         return service.findById(id)
-                .map(ResponseEntity::ok)
+                .map(chunk -> ResponseEntity.ok(mapper.toDto(chunk)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
