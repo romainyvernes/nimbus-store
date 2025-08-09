@@ -19,8 +19,8 @@ public class FileController {
     }
 
     // TODO: replace FileMetadata with a DTO for better separation of concerns
-    @PostMapping
-    public ResponseEntity<FileMetadata> uploadFile(
+    @PostMapping("/register")
+    public ResponseEntity<FileMetadata> registerFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("chunkCount") int chunkCount) throws IOException {
         FileMetadata saved = service.storeFile(file, chunkCount);
@@ -29,7 +29,7 @@ public class FileController {
 
     // TODO: replace FileMetadata with a DTO for better separation of concerns
     @GetMapping("/{id}")
-    public ResponseEntity<FileMetadata> getFileById(@PathVariable Long id) {
+    public ResponseEntity<FileMetadata> retrieveFile(@PathVariable Long id) {
         FileMetadata metadata = service.retrieveFile(id);
         return ResponseEntity.ok(metadata);
     }
