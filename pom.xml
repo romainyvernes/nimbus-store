@@ -21,7 +21,7 @@
     <modules>
         <module>metadata-service</module>
         <module>common-dto</module>
-<!--        <module>storage-node-api</module>-->
+        <module>storage-node-api</module>
 <!--        <module>client-api</module>-->
     </modules>
 
