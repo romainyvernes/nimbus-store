@@ -1,6 +1,7 @@
 package com.nimbusstore.dto;
 
 import lombok.*;
+import jakarta.validation.constraints.NotNull;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -11,5 +12,7 @@ public class ChunkMetadataDTO {
     private String storageNodeId;
     private String checksum;
     private Long fileId;
+    @NotNull
+    @NonNull
     private StorageStatus status;
 }

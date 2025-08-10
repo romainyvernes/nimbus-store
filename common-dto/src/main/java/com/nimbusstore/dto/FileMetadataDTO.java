@@ -1,7 +1,7 @@
 package com.nimbusstore.dto;
 
 import lombok.*;
-import java.time.Instant;
+import jakarta.validation.constraints.NotNull;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -13,6 +13,8 @@ public class FileMetadataDTO {
     private Long size;
     private Integer chunkCount;
     private Integer replicationFactor;
+    @NotNull
+    @NonNull
     private StorageStatus status;
     private String checksum;
 }
