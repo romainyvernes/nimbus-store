@@ -2,6 +2,7 @@ package com.nimbusstore.metadata.service;
 
 import com.nimbusstore.metadata.model.ChunkMetadata;
 import com.nimbusstore.metadata.repository.ChunkRepository;
+import com.nimbusstore.dto.StorageStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class ChunkService {
         return repo.findById(id);
     }
 
-    public ChunkMetadata updateStatus(Long id, String status) {
+    public ChunkMetadata updateStatus(Long id, StorageStatus status) {
         ChunkMetadata chunk = repo.findById(id).orElseThrow();
         chunk.setStatus(status);
         return repo.save(chunk);

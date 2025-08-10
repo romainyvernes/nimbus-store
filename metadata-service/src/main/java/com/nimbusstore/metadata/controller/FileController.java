@@ -1,6 +1,7 @@
 package com.nimbusstore.metadata.controller;
 
 import com.nimbusstore.dto.FileMetadataDTO;
+import com.nimbusstore.dto.StorageStatus;
 import com.nimbusstore.metadata.model.FileMetadata;
 import com.nimbusstore.metadata.service.FileService;
 import com.nimbusstore.metadata.mapper.FileMetadataMapper;
@@ -44,7 +45,7 @@ public class FileController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> updateStatus(
             @PathVariable Long id,
-            @RequestParam("status") String status) {
+            @RequestParam("status") StorageStatus status) {
         service.updateStatus(id, status);
         return ResponseEntity.ok().build();
     }

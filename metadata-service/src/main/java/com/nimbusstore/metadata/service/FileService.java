@@ -2,6 +2,7 @@ package com.nimbusstore.metadata.service;
 
 import com.nimbusstore.metadata.model.FileMetadata;
 import com.nimbusstore.metadata.repository.FileRepository;
+import com.nimbusstore.dto.StorageStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,7 +69,7 @@ public class FileService {
         return repo.findById(id).orElseThrow();
     }
 
-    public FileMetadata updateStatus(Long id, String status) {
+    public FileMetadata updateStatus(Long id, StorageStatus status) {
         FileMetadata file = repo.findById(id).orElseThrow();
         file.setStatus(status);
         return repo.save(file);

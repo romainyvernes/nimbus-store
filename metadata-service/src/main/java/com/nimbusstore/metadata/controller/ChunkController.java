@@ -1,6 +1,7 @@
 package com.nimbusstore.metadata.controller;
 
 import com.nimbusstore.dto.ChunkMetadataDTO;
+import com.nimbusstore.dto.StorageStatus;
 import com.nimbusstore.metadata.model.ChunkMetadata;
 import com.nimbusstore.metadata.service.ChunkService;
 import com.nimbusstore.metadata.mapper.ChunkMetadataMapper;
@@ -40,7 +41,7 @@ public class ChunkController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> updateStatus(
             @PathVariable Long id,
-            @RequestParam("status") String status) {
+            @RequestParam("status") StorageStatus status) {
         service.updateStatus(id, status);
         return ResponseEntity.ok().build();
     }

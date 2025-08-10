@@ -3,14 +3,13 @@ package com.nimbusstore.metadata.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
+import com.nimbusstore.dto.StorageStatus;
 
 @Entity
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileMetadata {
-    private static final String DEFAULT_STATUS = "pending";
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,7 +19,9 @@ public class FileMetadata {
     private Long size;
     private Integer chunkCount;
     private Integer replicationFactor;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private StorageStatus status;
     private String checksum;
 
     @Column(name = "created_at")
@@ -32,7 +33,7 @@ public class FileMetadata {
         this.size = size;
         this.chunkCount = chunkCount;
         this.replicationFactor = replicationFactor;
-        this.status = DEFAULT_STATUS;
+        this.status = StorageStatus.PENDING;
         this.checksum = checksum;
         this.createdAt = Instant.now();
     }

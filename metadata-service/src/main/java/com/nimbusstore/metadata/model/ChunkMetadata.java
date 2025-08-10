@@ -2,14 +2,13 @@ package com.nimbusstore.metadata.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.nimbusstore.dto.StorageStatus;
 
 @Entity
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChunkMetadata {
-    private static final String DEFAULT_STATUS = "pending";
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,13 +17,15 @@ public class ChunkMetadata {
     private String storageNodeId;
     private String checksum;
     private Long fileId;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private StorageStatus status;
 
     public ChunkMetadata(Integer chunkIndex, String storageNodeId, String checksum, Long fileId) {
         this.chunkIndex = chunkIndex;
         this.storageNodeId = storageNodeId;
         this.checksum = checksum;
         this.fileId = fileId;
-        this.status = DEFAULT_STATUS;
+        this.status = StorageStatus.PENDING;
     }
 }

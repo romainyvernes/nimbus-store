@@ -11,6 +11,5 @@ public class ChunkMetadataDTO {
     private String storageNodeId;
     private String checksum;
     private Long fileId;
-    private String status;
+    private StorageStatus status;
 }
-
