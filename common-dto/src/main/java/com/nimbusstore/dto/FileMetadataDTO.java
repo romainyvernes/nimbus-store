@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 public class FileMetadataDTO {
     private Long id;
     private String filename;
-    private String filepath;
     private Long size;
     private Integer chunkCount;
     private Integer replicationFactor;

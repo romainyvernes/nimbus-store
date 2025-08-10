@@ -15,7 +15,6 @@ public class FileMetadata {
     private Long id;
 
     private String filename;
-    private String filepath;
     private Long size;
     private Integer chunkCount;
     private Integer replicationFactor;
@@ -27,9 +26,8 @@ public class FileMetadata {
     @Column(name = "created_at")
     private Instant createdAt;
 
-    public FileMetadata(String filename, String filepath, Long size, Integer chunkCount, Integer replicationFactor, String checksum) {
+    public FileMetadata(String filename, Long size, Integer chunkCount, Integer replicationFactor, String checksum) {
         this.filename = filename;
-        this.filepath = filepath;
         this.size = size;
         this.chunkCount = chunkCount;
         this.replicationFactor = replicationFactor;
