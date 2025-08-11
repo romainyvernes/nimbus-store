@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.util.UUID;
 
 @Service
 public class FileService {
@@ -48,11 +49,11 @@ public class FileService {
         }
     }
 
-    public FileMetadata retrieveFile(Long id) {
+    public FileMetadata retrieveFile(UUID id) {
         return repo.findById(id).orElseThrow();
     }
 
-    public FileMetadata updateStatus(Long id, StorageStatus status) {
+    public FileMetadata updateStatus(UUID id, StorageStatus status) {
         FileMetadata file = repo.findById(id).orElseThrow();
         file.setStatus(status);
         return repo.save(file);

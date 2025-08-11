@@ -8,6 +8,8 @@ import com.nimbusstore.metadata.mapper.ChunkMetadataMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/chunks")
 public class ChunkController {
@@ -22,7 +24,7 @@ public class ChunkController {
 
     @PostMapping("/file/{fileId}")
     public ResponseEntity<ChunkMetadataDTO> uploadChunk(
-            @PathVariable Long fileId,
+            @PathVariable UUID fileId,
             @RequestBody ChunkMetadataDTO chunkDto) {
         ChunkMetadata chunk = mapper.toEntity(chunkDto);
         chunk.setFileId(fileId);
@@ -32,7 +34,7 @@ public class ChunkController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ChunkMetadataDTO> getChunk(@PathVariable Long id) {
+    public ResponseEntity<ChunkMetadataDTO> getChunk(@PathVariable UUID id) {
         return service.findById(id)
                 .map(chunk -> ResponseEntity.ok(mapper.toDto(chunk)))
                 .orElse(ResponseEntity.notFound().build());
@@ -40,7 +42,7 @@ public class ChunkController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> updateStatus(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestParam("status") StorageStatus status) {
         service.updateStatus(id, status);
         return ResponseEntity.ok().build();

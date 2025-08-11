@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.UUID;
 
 @Service
 public class ChunkService {
@@ -38,11 +39,11 @@ public class ChunkService {
         return nodes.get(idx).getId().toString();
     }
 
-    public Optional<ChunkMetadata> findById(Long id) {
+    public Optional<ChunkMetadata> findById(UUID id) {
         return repo.findById(id);
     }
 
-    public ChunkMetadata updateStatus(Long id, StorageStatus status) {
+    public ChunkMetadata updateStatus(UUID id, StorageStatus status) {
         ChunkMetadata chunk = repo.findById(id).orElseThrow();
         chunk.setStatus(status);
         return repo.save(chunk);

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/files")
@@ -33,7 +34,7 @@ public class FileController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FileMetadataDTO> retrieveFile(@PathVariable Long id) {
+    public ResponseEntity<FileMetadataDTO> retrieveFile(@PathVariable UUID id) {
         FileMetadata metadata = service.retrieveFile(id);
         if (metadata == null) {
             return ResponseEntity.notFound().build();
@@ -44,7 +45,7 @@ public class FileController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> updateStatus(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestParam("status") StorageStatus status) {
         service.updateStatus(id, status);
         return ResponseEntity.ok().build();

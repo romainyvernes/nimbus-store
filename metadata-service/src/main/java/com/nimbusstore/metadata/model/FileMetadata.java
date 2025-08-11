@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
 import com.nimbusstore.dto.StorageStatus;
+import java.util.UUID;
 
 @Entity
 @Getter @Setter
@@ -11,8 +12,8 @@ import com.nimbusstore.dto.StorageStatus;
 @AllArgsConstructor
 public class FileMetadata {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
     private String filename;
     private Long size;
