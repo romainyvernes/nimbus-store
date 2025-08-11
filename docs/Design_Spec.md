@@ -199,26 +199,20 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 - `GET /health`  
   *Service health check.*
 
-  **Response:**
-  ```json
-  {
-    "status": "healthy",
-    "nodes": [
-      {"id": "node1", "status": "up"},
-      {"id": "node2", "status": "up"}
-    ]
-  }
-  ```
+  **Response:**  
+  Plain text: `"Metadata Service is running!"`
 
 ---
 
 ### 6.2 Storage Node API
 
+#### Health Check
+
 - `GET /health`  
-  *Node health check.*
+  *Service health check.*
 
   **Response:**  
-  Plain text or JSON indicating node status.
+  Plain text: `"Storage Node API is running!"`
 
 ---
 
