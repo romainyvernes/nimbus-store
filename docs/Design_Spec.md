@@ -76,57 +76,128 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 ## 6️⃣ API Endpoints (Phase 1 MVP)
 
-- `POST /files`  
-  *Upload a file.*
+### 6.1 Metadata Service
 
-  **Request (multipart/form-data, uses DTO):**
+#### FileController
+
+- `POST /files/register`  
+  *Register a file and its metadata.*
+
+  **Request:**  
+  `multipart/form-data` with fields:
+  - `file`: binary file
+  - `chunkCount`: integer
+
+  **Response (DTO):**
   ```json
   {
-    "file": "<binary>"
+    "id": "uuid",
+    "filename": "example.txt",
+    "size": 12345,
+    "chunkCount": 4,
+    "replicationFactor": 3,
+    "status": "PENDING",
+    "checksum": "..."
+  }
+  ```
+
+- `GET /files/{id}`  
+  *Retrieve file metadata by UUID.*
+
+  **Response (DTO):**
+  ```json
+  {
+    "id": "uuid",
+    "filename": "example.txt",
+    "size": 12345,
+    "chunkCount": 4,
+    "replicationFactor": 3,
+    "status": "PENDING",
+    "checksum": "..."
+  }
+  ```
+
+- `PATCH /files/{id}/status`  
+  *Update file status.*
+
+  **Request:**  
+  Query parameter: `status` (e.g., `ARCHIVED`)
+
+  **Response:**  
+  Returns only an appropriate HTTP status code (e.g., `204 No Content`). The updated entity is not returned.
+
+#### ChunkController
+
+- `POST /chunks/file/{fileId}`  
+  *Upload a chunk for a file.*
+
+  **Request (DTO):**
+  ```json
+  {
+    "chunkIndex": 0,
+    "checksum": "...",
+    "status": "PENDING"
   }
   ```
 
   **Response (DTO):**
   ```json
   {
-    "fileId": "abc123",
-    "status": "uploaded"
+    "id": "uuid",
+    "chunkIndex": 0,
+    "storageNodeId": "uuid",
+    "checksum": "...",
+    "fileId": "uuid",
+    "status": "PENDING"
   }
   ```
 
-- `GET /files/{fileId}`  
-  *Download a file.*
+- `GET /chunks/{id}`  
+  *Retrieve chunk metadata by UUID.*
 
-  **Response:**  
-  Binary file stream.
-
-
-- `PATCH /files/{id}/status`  
-  *Update file status.*
-
-  **Request (DTO):**
+  **Response (DTO):**
   ```json
   {
-    "status": "archived"
+    "id": "uuid",
+    "chunkIndex": 0,
+    "storageNodeId": "uuid",
+    "checksum": "...",
+    "fileId": "uuid",
+    "status": "PENDING"
   }
   ```
-  **Response:**  
-  Returns only an appropriate HTTP status code (e.g., `204 No Content`). The updated entity is not returned.
 
 - `PATCH /chunks/{id}/status`  
   *Update chunk status.*
 
-  **Request (DTO):**
-  ```json
-  {
-    "status": "replicated"
-  }
-  ```
+  **Request:**  
+  Query parameter: `status` (e.g., `REPLICATED`)
+
   **Response:**  
   Returns only an appropriate HTTP status code (e.g., `204 No Content`). The updated entity is not returned.
 
+#### StorageNodeController
+
+- `POST /nodes`  
+  *Create a new storage node.*
+
+  **Response:**
+  ```json
+  {
+    "id": "uuid"
+  }
+  ```
+
+- `DELETE /nodes/{id}`  
+  *Delete a storage node by UUID.*
+
+  **Response:**  
+  Returns only an appropriate HTTP status code (e.g., `204 No Content`).
+
+#### HealthController
+
 - `GET /health`  
-  *Node/cluster status.*
+  *Service health check.*
 
   **Response:**
   ```json
@@ -138,6 +209,26 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
     ]
   }
   ```
+
+---
+
+### 6.2 Storage Node API
+
+- `GET /health`  
+  *Node health check.*
+
+  **Response:**  
+  Plain text or JSON indicating node status.
+
+---
+
+### 6.3 Client API
+
+- `POST /files`  
+  *Upload a file.*
+
+- `GET /files/{fileId}`  
+  *Download a file.*
 
 ---
 
