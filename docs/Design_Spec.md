@@ -78,7 +78,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 ### 6.1 Metadata Service
 
-#### FileController
+#### Files
 
 - `POST /files/register`  
   *Register a file and its metadata.*
@@ -126,7 +126,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   **Response:**  
   Returns only an appropriate HTTP status code (e.g., `204 No Content`). The updated entity is not returned.
 
-#### ChunkController
+#### Chunks
 
 - `POST /chunks/file/{fileId}`  
   *Upload a chunk for a file.*
@@ -176,7 +176,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   **Response:**  
   Returns only an appropriate HTTP status code (e.g., `204 No Content`). The updated entity is not returned.
 
-#### StorageNodeController
+#### Storage Nodes
 
 - `POST /nodes`  
   *Create a new storage node.*
@@ -194,7 +194,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   **Response:**  
   Returns only an appropriate HTTP status code (e.g., `204 No Content`).
 
-#### HealthController
+#### Health Check
 
 - `GET /health`  
   *Service health check.*
