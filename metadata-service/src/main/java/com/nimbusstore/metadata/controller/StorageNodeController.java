@@ -19,8 +19,7 @@ public class StorageNodeController {
 
     @PostMapping
     public ResponseEntity<StorageNode> createNode() {
-        StorageNode node = new StorageNode(UUID.randomUUID());
-        StorageNode saved = repo.save(node);
+        StorageNode saved = repo.save(new StorageNode());
         return ResponseEntity.ok(saved);
     }
 
