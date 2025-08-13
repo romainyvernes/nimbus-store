@@ -126,6 +126,33 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   **Response:**  
   Returns only an appropriate HTTP status code (e.g., `204 No Content`). The updated entity is not returned.
 
+- `GET /files`  
+  *Retrieve metadata about all files (paginated).*
+
+  **Request:**  
+  Query parameters:
+  - `page`: integer (default: 0)
+  - `size`: integer (default: 10, maximum: 100)
+
+  **Response:**
+  ```json
+  {
+    "files": [
+      {
+        "id": "uuid",
+        "filename": "example.txt",
+        "size": 12345,
+        "chunkCount": 4,
+        "replicationFactor": 3,
+        "status": "PENDING",
+        "checksum": "..."
+      }
+      // ...more file DTOs...
+    ],
+    "total": 42
+  }
+  ```
+
 #### Chunks
 
 - `POST /chunks/file/{fileId}`  

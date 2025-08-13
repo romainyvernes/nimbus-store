@@ -3,6 +3,8 @@ package com.nimbusstore.metadata.service;
 import com.nimbusstore.metadata.model.FileMetadata;
 import com.nimbusstore.metadata.repository.FileRepository;
 import com.nimbusstore.dto.StorageStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,5 +59,9 @@ public class FileService {
         FileMetadata file = repo.findById(id).orElseThrow();
         file.setStatus(status);
         return repo.save(file);
+    }
+
+    public Page<FileMetadata> getAllFiles(Pageable pageable) {
+        return repo.findAll(pageable);
     }
 }
