@@ -11,6 +11,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class StorageNode {
     @Id
-    @GeneratedValue
     private UUID id;
 }

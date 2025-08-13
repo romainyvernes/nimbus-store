@@ -205,21 +205,18 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 #### Storage Nodes
 
-- `POST /nodes`  
-  *Create a new storage node.*
+- `POST /nodes/register`  
+  *Register a new storage node with a provided UUID.*
 
-  **Response:**
+  **Request:**
   ```json
   {
     "id": "uuid"
   }
   ```
 
-- `DELETE /nodes/{id}`  
-  *Delete a storage node by UUID.*
-
   **Response:**  
-  Returns only an appropriate HTTP status code (e.g., `204 No Content`).
+  Returns only an appropriate HTTP status code (e.g., `200 OK`).
 
 #### Health Check
 

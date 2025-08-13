@@ -5,6 +5,7 @@ import com.nimbusstore.metadata.repository.StorageNodeRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -17,19 +18,10 @@ public class StorageNodeController {
         this.repo = repo;
     }
 
-    @PostMapping
-    public ResponseEntity<StorageNode> createNode() {
-        StorageNode saved = repo.save(new StorageNode());
-        return ResponseEntity.ok(saved);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNode(@PathVariable UUID id) {
-        if (repo.existsById(id)) {
-            repo.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    @PostMapping("/register")
+    public ResponseEntity<Void> createNode(@RequestBody Map<String, UUID> body) {
+        StorageNode node = new StorageNode(body.get("id"));
+        repo.save(node);
+        return ResponseEntity.ok().build();
     }
 }
-
