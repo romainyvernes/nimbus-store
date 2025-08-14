@@ -162,8 +162,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   ```json
   {
     "chunkIndex": 0,
-    "checksum": "...",
-    "status": "PENDING"
+    "checksum": "..."
   }
   ```
 

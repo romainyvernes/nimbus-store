@@ -44,6 +44,9 @@ public class ChunkController {
     public ResponseEntity<Void> updateStatus(
             @PathVariable UUID id,
             @RequestParam("status") StorageStatus status) {
+        if (status == null) {
+            return ResponseEntity.badRequest().build();
+        }
         service.updateStatus(id, status);
         return ResponseEntity.ok().build();
     }
