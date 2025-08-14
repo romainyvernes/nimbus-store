@@ -237,6 +237,25 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   **Response:**  
   Plain text: `"Storage Node API is running!"`
 
+#### Chunks
+
+- `POST /chunks/upload`  
+  *Upload a chunk to the storage node.*
+
+  **Request:**  
+  - Query parameter: `id` (UUID of the chunk)
+  - Request body: binary chunk data
+
+  **Response:**  
+  Returns only an appropriate HTTP status code (e.g., `201 Created`).
+
+- `GET /chunks/{chunkId}`  
+  *Retrieve a chunk from the storage node by UUID.*
+
+  **Response:**  
+  - Response body: binary chunk data
+  - Returns `200 OK` if found, `404 Not Found` if not.
+
 ---
 
 ### 6.3 Client API
