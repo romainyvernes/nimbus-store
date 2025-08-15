@@ -1,12 +1,13 @@
 package com.nimbusstore.metadata.controller;
 
+import com.nimbusstore.dto.HeartbeatRequestDTO;
+import com.nimbusstore.dto.NodeRegistrationRequestDTO;
 import com.nimbusstore.metadata.model.StorageNode;
 import com.nimbusstore.metadata.repository.StorageNodeRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
-import java.util.UUID;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/nodes")
@@ -19,8 +20,19 @@ public class StorageNodeController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> createNode(@RequestBody Map<String, UUID> body) {
-        StorageNode node = new StorageNode(body.get("id"));
+    public ResponseEntity<Void> createNode(@RequestBody NodeRegistrationRequestDTO body) {
+        StorageNode node = repo.findById(body.getId())
+            .orElseGet(() -> new StorageNode(body.getId(), System.currentTimeMillis()));
+        node.setLastHeartbeat(System.currentTimeMillis());
+        repo.save(node);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/heartbeat")
+    public ResponseEntity<Void> heartbeat(@RequestBody HeartbeatRequestDTO body) {
+        StorageNode node = repo.findById(body.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        node.setLastHeartbeat(System.currentTimeMillis());
         repo.save(node);
         return ResponseEntity.ok().build();
     }

@@ -12,4 +12,5 @@ import java.util.UUID;
 public class StorageNode {
     @Id
     private UUID id;
+    private Long lastHeartbeat;
 }
