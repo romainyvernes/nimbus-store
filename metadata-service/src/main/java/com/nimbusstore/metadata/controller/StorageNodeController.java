@@ -22,7 +22,11 @@ public class StorageNodeController {
     @PostMapping("/register")
     public ResponseEntity<Void> createNode(@RequestBody NodeRegistrationRequestDTO body) {
         StorageNode node = repo.findById(body.getId())
-            .orElseGet(() -> new StorageNode(body.getId(), System.currentTimeMillis()));
+            .orElseGet(() -> new StorageNode(
+                body.getId(),
+                System.currentTimeMillis(),
+                body.getUrl()
+            ));
         node.setLastHeartbeat(System.currentTimeMillis());
         repo.save(node);
         return ResponseEntity.ok().build();

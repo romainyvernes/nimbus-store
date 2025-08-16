@@ -11,5 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class NodeRegistrationRequestDTO {
     private UUID id;
+    private String url;
 }
 

@@ -18,7 +18,6 @@ public class FileMetadata {
     private String filename;
     private Long size;
     private Integer chunkCount;
-    private Integer replicationFactor;
 
     @Enumerated(EnumType.STRING)
     private StorageStatus status;
@@ -27,11 +26,10 @@ public class FileMetadata {
     @Column(name = "created_at")
     private Instant createdAt;
 
-    public FileMetadata(String filename, Long size, Integer chunkCount, Integer replicationFactor, String checksum) {
+    public FileMetadata(String filename, Long size, Integer chunkCount, String checksum) {
         this.filename = filename;
         this.size = size;
         this.chunkCount = chunkCount;
-        this.replicationFactor = replicationFactor;
         this.status = StorageStatus.PENDING;
         this.checksum = checksum;
         this.createdAt = Instant.now();

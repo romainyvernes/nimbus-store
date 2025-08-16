@@ -11,7 +11,6 @@ public class FileMetadataDTO {
     private String filename;
     private Long size;
     private Integer chunkCount;
-    private Integer replicationFactor;
     private StorageStatus status;
     private String checksum;
 }

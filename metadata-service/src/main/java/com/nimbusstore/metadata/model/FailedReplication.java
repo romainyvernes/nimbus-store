@@ -9,9 +9,14 @@ import java.util.UUID;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StorageNode {
+@RequiredArgsConstructor
+public class FailedReplication {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    private Long lastHeartbeat;
-    private String url;
+
+    @NonNull
+    private UUID chunkId;
+    @NonNull
+    private String failedNodeId;
 }

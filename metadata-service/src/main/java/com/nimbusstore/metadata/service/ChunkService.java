@@ -5,10 +5,14 @@ import com.nimbusstore.metadata.model.StorageNode;
 import com.nimbusstore.metadata.repository.ChunkRepository;
 import com.nimbusstore.metadata.repository.StorageNodeRepository;
 import com.nimbusstore.dto.StorageStatus;
+import com.nimbusstore.dto.ChunkMetadataDTO;
+import com.nimbusstore.metadata.mapper.ChunkMetadataMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.UUID;
 
@@ -18,16 +22,15 @@ public class ChunkService {
     private final ChunkRepository repo;
     private final StorageNodeRepository nodeRepo;
     private final AtomicInteger roundRobinIndex = new AtomicInteger(0);
+    private final ChunkMetadataMapper mapper;
 
-    public ChunkService(ChunkRepository repo, StorageNodeRepository nodeRepo) {
+    @Value("${replication-factor}")
+    private int replicationFactor;
+
+    public ChunkService(ChunkRepository repo, StorageNodeRepository nodeRepo, ChunkMetadataMapper mapper) {
         this.repo = repo;
         this.nodeRepo = nodeRepo;
-    }
-
-    public ChunkMetadata save(ChunkMetadata chunk) {
-        String assignedNode = getNextNodeId();
-        chunk.setStorageNodeId(assignedNode);
-        return repo.save(chunk);
+        this.mapper = mapper;
     }
 
     private String getNextNodeId() {
@@ -39,13 +42,52 @@ public class ChunkService {
         return nodes.get(idx).getId().toString();
     }
 
-    public Optional<ChunkMetadata> findById(UUID id) {
-        return repo.findById(id);
-    }
-
-    public ChunkMetadata updateStatus(UUID id, StorageStatus status) {
+    public void updateStatus(UUID id, StorageStatus status) {
         ChunkMetadata chunk = repo.findById(id).orElseThrow();
         chunk.setStatus(status);
-        return repo.save(chunk);
+        repo.save(chunk);
+    }
+
+    public ChunkMetadataDTO toDtoWithNodeUrl(ChunkMetadata chunk) {
+        ChunkMetadataDTO dto = mapper.toDto(chunk);
+        nodeRepo.findById(UUID.fromString(chunk.getStorageNodeId()))
+            .ifPresent(node -> dto.setNodeUrl(node.getUrl()));
+        return dto;
+    }
+
+    /**
+     * Replicates a chunk up to the configured replication factor, using round-robin node assignment.
+     * Returns a list of all replicas (existing + newly created).
+     */
+    public List<ChunkMetadataDTO> replicateChunk(ChunkMetadataDTO chunkDto) {
+        List<ChunkMetadata> existingReplicas = repo.findByChecksum(chunkDto.getChecksum());
+        int currentReplicaCount = existingReplicas.size();
+
+        List<ChunkMetadataDTO> resultDtos = new ArrayList<>();
+
+        // If we already have enough replicas, return them
+        if (currentReplicaCount >= replicationFactor) {
+            for (ChunkMetadata replica : existingReplicas) {
+                resultDtos.add(toDtoWithNodeUrl(replica));
+            }
+            return resultDtos;
+        }
+
+        // Otherwise, create new replicas up to replicationFactor
+        int needed = replicationFactor - currentReplicaCount;
+        for (int i = 0; i < needed; i++) {
+            ChunkMetadata chunk = mapper.toEntity(chunkDto);
+            String assignedNode = getNextNodeId();
+            chunk.setStorageNodeId(assignedNode);
+            repo.save(chunk);
+            resultDtos.add(toDtoWithNodeUrl(chunk));
+        }
+
+        // Add existing replicas to the result
+        for (ChunkMetadata replica : existingReplicas) {
+            resultDtos.add(toDtoWithNodeUrl(replica));
+        }
+
+        return resultDtos;
     }
 }
