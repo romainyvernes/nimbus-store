@@ -10,28 +10,24 @@ import java.util.UUID;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class FileMetadata {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @NonNull
     private String filename;
+    @NonNull
     private Long size;
+    @NonNull
     private Integer chunkCount;
-
-    @Enumerated(EnumType.STRING)
-    private StorageStatus status;
+    @NonNull
     private String checksum;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+    @Enumerated(EnumType.STRING)
+    private StorageStatus status = StorageStatus.PENDING;
 
-    public FileMetadata(String filename, Long size, Integer chunkCount, String checksum) {
-        this.filename = filename;
-        this.size = size;
-        this.chunkCount = chunkCount;
-        this.status = StorageStatus.PENDING;
-        this.checksum = checksum;
-        this.createdAt = Instant.now();
-    }
+    @Column(name = "created_at")
+    private Instant createdAt = Instant.now();
 }

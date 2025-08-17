@@ -18,5 +18,5 @@ public class FailedReplication {
     @NonNull
     private UUID chunkId;
     @NonNull
-    private String failedNodeId;
+    private UUID failedNodeId;
 }

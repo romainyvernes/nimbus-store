@@ -27,16 +27,16 @@ public class ChunkReplicationService {
         this.chunkRepo = chunkRepo;
     }
 
-    public boolean replicateChunk(ChunkMetadata chunk, String deadNodeId) {
+    public boolean replicateChunk(ChunkMetadata chunk, UUID deadNodeId) {
         // Find all node IDs that already have this chunk
         List<ChunkMetadata> replicas = chunkRepo.findByChecksum(chunk.getChecksum());
-        Set<String> existingNodeIds = replicas.stream()
+        Set<UUID> existingNodeIds = replicas.stream()
             .map(ChunkMetadata::getStorageNodeId)
             .collect(Collectors.toSet());
 
         // Find a healthy node not already storing the chunk
         List<StorageNode> healthyNodes = nodeRepo.findAll().stream()
-            .filter(node -> !existingNodeIds.contains(node.getId().toString()))
+            .filter(node -> !existingNodeIds.contains(node.getId()))
             .toList();
 
         if (healthyNodes.isEmpty()) {
@@ -48,14 +48,14 @@ public class ChunkReplicationService {
             ThreadLocalRandom.current().nextInt(healthyNodes.size())
         );
 
-        String sourceNodeId = replicas.stream()
+        UUID sourceNodeId = replicas.stream()
             .map(ChunkMetadata::getStorageNodeId)
             .filter(storageNodeId -> !storageNodeId.equals(deadNodeId))
             .findFirst()
             .orElse(null);
 
         StorageNode sourceNode = (sourceNodeId != null)
-            ? nodeRepo.findById(UUID.fromString(sourceNodeId)).orElse(null)
+            ? nodeRepo.findById(sourceNodeId).orElse(null)
             : null;
 
         if (sourceNode == null) {
@@ -75,7 +75,7 @@ public class ChunkReplicationService {
         }
 
         // Update chunk metadata to reflect new storage node
-        chunk.setStorageNodeId(targetNode.getId().toString());
+        chunk.setStorageNodeId(targetNode.getId());
         chunkRepo.save(chunk);
         return true;
     }

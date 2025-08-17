@@ -10,7 +10,6 @@ import com.nimbusstore.metadata.mapper.ChunkMetadataMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,13 +32,13 @@ public class ChunkService {
         this.mapper = mapper;
     }
 
-    private String getNextNodeId() {
+    private UUID getNextNodeId() {
         List<StorageNode> nodes = nodeRepo.findAll();
         if (nodes.isEmpty()) {
             throw new IllegalStateException("No storage nodes available");
         }
         int idx = roundRobinIndex.getAndUpdate(i -> (i + 1) % nodes.size());
-        return nodes.get(idx).getId().toString();
+        return nodes.get(idx).getId();
     }
 
     public void updateStatus(UUID id, StorageStatus status) {
@@ -50,7 +49,7 @@ public class ChunkService {
 
     public ChunkMetadataDTO toDtoWithNodeUrl(ChunkMetadata chunk) {
         ChunkMetadataDTO dto = mapper.toDto(chunk);
-        nodeRepo.findById(UUID.fromString(chunk.getStorageNodeId()))
+        nodeRepo.findById(chunk.getStorageNodeId())
             .ifPresent(node -> dto.setNodeUrl(node.getUrl()));
         return dto;
     }
@@ -77,7 +76,7 @@ public class ChunkService {
         int needed = replicationFactor - currentReplicaCount;
         for (int i = 0; i < needed; i++) {
             ChunkMetadata chunk = mapper.toEntity(chunkDto);
-            String assignedNode = getNextNodeId();
+            UUID assignedNode = getNextNodeId();
             chunk.setStorageNodeId(assignedNode);
             repo.save(chunk);
             resultDtos.add(toDtoWithNodeUrl(chunk));

@@ -9,24 +9,21 @@ import java.util.UUID;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class ChunkMetadata {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @NonNull
     private Integer chunkIndex;
-    private String storageNodeId;
+    @NonNull
+    private UUID storageNodeId;
+    @NonNull
     private String checksum;
+    @NonNull
     private UUID fileId;
 
     @Enumerated(EnumType.STRING)
-    private StorageStatus status;
-
-    public ChunkMetadata(Integer chunkIndex, String storageNodeId, String checksum, UUID fileId) {
-        this.chunkIndex = chunkIndex;
-        this.storageNodeId = storageNodeId;
-        this.checksum = checksum;
-        this.fileId = fileId;
-        this.status = StorageStatus.PENDING;
-    }
+    private StorageStatus status = StorageStatus.PENDING;
 }

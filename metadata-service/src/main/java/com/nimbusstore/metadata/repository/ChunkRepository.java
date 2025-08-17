@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ChunkRepository extends JpaRepository<ChunkMetadata, UUID> {
-    List<ChunkMetadata> findByStorageNodeId(String storageNodeId);
+    List<ChunkMetadata> findByStorageNodeId(UUID storageNodeId); // changed from String to UUID
     List<ChunkMetadata> findByChecksum(String checksum);
 }

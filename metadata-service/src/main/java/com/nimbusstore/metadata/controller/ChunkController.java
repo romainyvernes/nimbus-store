@@ -4,11 +4,8 @@ import com.nimbusstore.dto.ChunkMetadataDTO;
 import com.nimbusstore.dto.StorageStatus;
 import com.nimbusstore.metadata.model.ChunkMetadata;
 import com.nimbusstore.metadata.service.ChunkService;
-import com.nimbusstore.metadata.mapper.ChunkMetadataMapper;
 import com.nimbusstore.metadata.repository.ChunkRepository;
-import com.nimbusstore.metadata.repository.StorageNodeRepository;
 import com.nimbusstore.metadata.service.NodeCleanupService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,28 +15,21 @@ import java.util.*;
 @RequestMapping("/chunks")
 public class ChunkController {
 
-    private final ChunkService service;
-    private final ChunkMetadataMapper mapper;
+    private final ChunkService chunkService;
     private final ChunkRepository chunkRepo;
-    private final StorageNodeRepository nodeRepo;
     private final NodeCleanupService nodeCleanupService;
 
-    @Value("${dead-node-threshold}")
-    private long deadNodeThreshold;
-
-    public ChunkController(ChunkService service, ChunkMetadataMapper mapper,
-                          ChunkRepository chunkRepo, StorageNodeRepository nodeRepo,
+    public ChunkController(ChunkService chunkService,
+                          ChunkRepository chunkRepo,
                           NodeCleanupService nodeCleanupService) {
-        this.service = service;
-        this.mapper = mapper;
+        this.chunkService = chunkService;
         this.chunkRepo = chunkRepo;
-        this.nodeRepo = nodeRepo;
         this.nodeCleanupService = nodeCleanupService;
     }
 
     @PostMapping
     public ResponseEntity<List<ChunkMetadataDTO>> uploadChunk(@RequestBody ChunkMetadataDTO chunkDto) {
-        List<ChunkMetadataDTO> resultDtos = service.replicateChunk(chunkDto);
+        List<ChunkMetadataDTO> resultDtos = chunkService.replicateChunk(chunkDto);
         return ResponseEntity.ok(resultDtos);
     }
 
@@ -52,7 +42,7 @@ public class ChunkController {
 
         ChunkMetadata liveReplica = nodeCleanupService.findLiveReplica(replicas);
         if (liveReplica != null) {
-            return ResponseEntity.ok(service.toDtoWithNodeUrl(liveReplica));
+            return ResponseEntity.ok(chunkService.toDtoWithNodeUrl(liveReplica));
         }
         return ResponseEntity.status(404).build();
     }
@@ -64,7 +54,7 @@ public class ChunkController {
         if (status == null) {
             return ResponseEntity.badRequest().build();
         }
-        service.updateStatus(id, status);
+        chunkService.updateStatus(id, status);
         return ResponseEntity.ok().build();
     }
 }

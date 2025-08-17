@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class NodeCleanupService {
@@ -51,9 +52,9 @@ public class NodeCleanupService {
      */
     public ChunkMetadata findLiveReplica(List<ChunkMetadata> replicas) {
         for (ChunkMetadata replica : replicas) {
-            String nodeIdStr = replica.getStorageNodeId();
+            UUID nodeId = replica.getStorageNodeId();
             try {
-                StorageNode node = nodeRepo.findById(java.util.UUID.fromString(nodeIdStr)).orElse(null);
+                StorageNode node = nodeRepo.findById(nodeId).orElse(null);
                 if (node != null && !isNodeDead(node)) {
                     return replica;
                 }
@@ -71,14 +72,14 @@ public class NodeCleanupService {
             .toList();
 
         for (StorageNode deadNode : deadNodes) {
-            List<ChunkMetadata> chunks = chunkRepo.findByStorageNodeId(deadNode.getId().toString());
+            List<ChunkMetadata> chunks = chunkRepo.findByStorageNodeId(deadNode.getId());
             for (ChunkMetadata chunk : chunks) {
                 List<ChunkMetadata> replicas = chunkRepo.findByChecksum(chunk.getChecksum());
                 if (replicas.size() < replicationFactor) {
                     chunk.setStatus(StorageStatus.REPLICATING);
                     chunkRepo.save(chunk);
 
-                    boolean replicated = replicationService.replicateChunk(chunk, deadNode.getId().toString());
+                    boolean replicated = replicationService.replicateChunk(chunk, deadNode.getId());
 
                     chunk.setStatus(replicated ? StorageStatus.COMPLETED : StorageStatus.FAILED);
                     chunkRepo.save(chunk);
