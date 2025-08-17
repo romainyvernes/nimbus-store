@@ -22,6 +22,9 @@ public class NodeRegistrationService {
     @Value("${metadata-service.base-url}")
     private String metadataServiceBaseUrl;
 
+    @Value("${node.application-url}")
+    private String applicationUrl;
+
     private static final String NODE_ID_FILE = "node-id.txt";
     private final RestTemplate restTemplate = new RestTemplate();
     @Getter
@@ -51,7 +54,7 @@ public class NodeRegistrationService {
     public void register() { // register with metadata service
         String url = metadataServiceBaseUrl + "/nodes/register";
         try {
-            restTemplate.postForEntity(url, new NodeRegistrationRequestDTO(nodeId), Void.class);
+            restTemplate.postForEntity(url, new NodeRegistrationRequestDTO(nodeId, applicationUrl), Void.class);
         } catch (Exception e) {
             log.error("Failed to register node with metadata service", e);
         }
