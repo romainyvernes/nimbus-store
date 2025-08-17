@@ -8,8 +8,6 @@ import org.springframework.web.client.RestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.UUID;
-
 @Service
 public class HeartbeatService {
 
@@ -17,6 +15,9 @@ public class HeartbeatService {
 
     @Value("${metadata-service.base-url}")
     private String metadataServiceBaseUrl;
+
+    @Value("${heartbeat.frequency}")
+    private long frequency;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final NodeRegistrationService nodeRegistrationService;
@@ -26,7 +27,7 @@ public class HeartbeatService {
         this.nodeRegistrationService.register();
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRateString = "${heartbeat.frequency}")
     public void sendHeartbeat() {
         String url = metadataServiceBaseUrl + "/nodes/heartbeat";
         try {
