@@ -54,6 +54,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 **DTO Usage:**  
 - All API endpoints must use Data Transfer Objects (DTOs) for both requests and responses, rather than exposing internal entity classes directly.
 - Mapping between entities and DTOs should be handled in the service layer or via a dedicated mapper component to ensure separation of concerns and API stability.
+- **Validation:** DTOs are validated using annotations (e.g., `@Valid`, `@NotNull`). Invalid requests will result in `400 Bad Request` responses.
 
 **Database Schema (Metadata Service):**
 
@@ -71,16 +72,23 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 - **Write Path:** Client uploads chunk → Metadata assigns N nodes → Chunk sent in parallel.
 - **Failure Detection:** Heartbeat messages from Metadata → Node every 5s.
 - **Recovery:** If a node misses 3 heartbeats, it's marked as down. Metadata selects a healthy node to create a new replica and updates chunk mapping.
+- **Chunk Replication Details:** Chunk upload returns metadata for all replicas. Replication is triggered and managed by the Replication Manager component.
 
 ---
 
 ## 6️⃣ API Endpoints (Phase 1 MVP)
 
+**Error Handling:**  
+- All endpoints return appropriate HTTP status codes for error cases (`404 Not Found`, `400 Bad Request`, `500 Internal Server Error`, etc.) to ensure RESTful consistency.
+
+**API Consistency:**  
+- All endpoints use DTOs for both requests and responses. Internal entities are never exposed directly.
+
 ### 6.1 Metadata Service
 
 #### Files
 
-- `POST /files/register`  
+- `POST /files/register`
   *Register a file and its metadata.*
 
   **Request:**  
@@ -100,7 +108,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   }
   ```
 
-- `GET /files/{id}`  
+- `GET /files/{id}`
   *Retrieve file metadata by UUID.*
 
   **Response (DTO):**
@@ -115,7 +123,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   }
   ```
 
-- `PATCH /files/{id}/status`  
+- `PATCH /files/{id}/status`
   *Update file status.*
 
   **Request:**  
@@ -124,7 +132,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   **Response:**  
   Returns only an appropriate HTTP status code (`200 OK` if updated, `400 Bad Request` if missing status, `404 Not Found` if file not found).
 
-- `GET /files`  
+- `GET /files`
   *Retrieve metadata about all files (paginated).*
 
   **Request:**  
@@ -152,7 +160,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 #### Chunks
 
-- `POST /chunks`  
+- `POST /chunks`
   *Upload a chunk for a file.*
 
   **Request (JSON):**
@@ -179,7 +187,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   ]
   ```
 
-- `GET /chunks/{chunkChecksum}`  
+- `GET /chunks/{chunkChecksum}`
   *Retrieve chunk metadata by checksum.*
 
   **Response (DTO):**
@@ -194,7 +202,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   }
   ```
 
-- `PATCH /chunks/{id}/status`  
+- `PATCH /chunks/{id}/status`
   *Update chunk status.*
 
   **Request:**  
@@ -205,7 +213,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 #### Storage Nodes
 
-- `POST /nodes/register`  
+- `POST /nodes/register`
   *Register a new storage node with a provided UUID and URL.*
 
   **Request:**
@@ -219,7 +227,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   **Response:**  
   Returns only an appropriate HTTP status code (`200 OK`).
 
-- `POST /nodes/heartbeat`  
+- `POST /nodes/heartbeat`
   *Update last heartbeat for a node.*
 
   **Request:**
@@ -234,7 +242,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 #### Health Check
 
-- `GET /health`  
+- `GET /health`
   *Service health check.*
 
   **Response:**  
@@ -246,7 +254,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 #### Health Check
 
-- `GET /health`  
+- `GET /health`
   *Service health check.*
 
   **Response:**  
@@ -254,7 +262,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 #### Chunks
 
-- `POST /chunks/upload`  
+- `POST /chunks/upload`
   *Upload a chunk to the storage node.*
 
   **Request:**  
@@ -263,7 +271,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   **Response:**  
   Returns `201 Created` and the checksum as body if successful.
 
-- `GET /chunks/{chunkChecksum}`  
+- `GET /chunks/{chunkChecksum}`
   *Retrieve a chunk from the storage node by checksum.*
 
   **Response:**  
@@ -293,6 +301,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 ## 8️⃣ Trade-Offs and Design Choices
 
 - **DTOs:** All API endpoints use DTOs for input/output. Entities are mapped to DTOs in the service layer or with a dedicated mapper.
+- **Validation:** DTOs are validated and invalid requests result in `400 Bad Request`.
 - **Consistency:** Eventual consistency for simplicity and speed.
 - **API:** REST initially for rapid development; gRPC for future efficiency.
 - **Tech Stack:** Java + Spring Boot for fast iteration and industry alignment.
@@ -300,10 +309,19 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 ---
 
-## 9️⃣ Future Enhancements (Phases 2–4)
+## 9️⃣ Testing Strategy
+
+- **Unit Tests:** Isolate and test individual components and methods using mocks.
+- **Integration Tests:** Use `@SpringBootTest` to verify end-to-end behavior, including file system and service interactions.
+- **Error Handling:** Tests verify correct HTTP status codes for all error scenarios.
+
+---
+
+## 🔟 Future Enhancements (Phases 2–4)
 
 - Leader election for Metadata Service.
 - Erasure coding for storage efficiency.
 - JWT-based authentication and secure file sharing.
 - Cloud deployment (Kubernetes + AWS S3/EBS).
 - Performance benchmarking and reporting.
+- Ongoing improvements to validation and error handling.
