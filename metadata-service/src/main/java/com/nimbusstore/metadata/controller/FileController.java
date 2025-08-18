@@ -40,7 +40,12 @@ public class FileController {
 
     @GetMapping("/{id}")
     public ResponseEntity<FileMetadataDTO> retrieveFile(@PathVariable UUID id) {
-        FileMetadata metadata = service.retrieveFile(id);
+        FileMetadata metadata;
+        try {
+            metadata = service.retrieveFile(id);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
         if (metadata == null) {
             return ResponseEntity.notFound().build();
         }
@@ -55,7 +60,15 @@ public class FileController {
         if (status == null) {
             return ResponseEntity.badRequest().build();
         }
-        service.updateStatus(id, status);
+        FileMetadata file = service.retrieveFile(id);
+        if (file == null) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            service.updateStatus(id, status);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
         return ResponseEntity.ok().build();
     }
 
@@ -64,7 +77,15 @@ public class FileController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         int pageSize = Math.min(size, MAX_PAGE_SIZE);
-        Page<FileMetadata> filePage = service.getAllFiles(PageRequest.of(page, pageSize));
+        Page<FileMetadata> filePage;
+        try {
+            filePage = service.getAllFiles(PageRequest.of(page, pageSize));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+        if (filePage.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         List<FileMetadataDTO> dtos = filePage.getContent().stream()
                 .map(mapper::toDto)
                 .toList();

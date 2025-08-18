@@ -35,16 +35,22 @@ public class ChunkService {
     private UUID getNextNodeId() {
         List<StorageNode> nodes = nodeRepo.findAll();
         if (nodes.isEmpty()) {
-            throw new IllegalStateException("No storage nodes available");
+            return null;
         }
         int idx = roundRobinIndex.getAndUpdate(i -> (i + 1) % nodes.size());
         return nodes.get(idx).getId();
     }
 
     public void updateStatus(UUID id, StorageStatus status) {
-        ChunkMetadata chunk = repo.findById(id).orElseThrow();
-        chunk.setStatus(status);
-        repo.save(chunk);
+        try {
+            ChunkMetadata chunk = repo.findById(id).orElse(null);
+            if (chunk != null) {
+                chunk.setStatus(status);
+                repo.save(chunk);
+            }
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     public ChunkMetadataDTO toDtoWithNodeUrl(ChunkMetadata chunk) {
@@ -77,6 +83,7 @@ public class ChunkService {
         for (int i = 0; i < needed; i++) {
             ChunkMetadata chunk = mapper.toEntity(chunkDto);
             UUID assignedNode = getNextNodeId();
+            if (assignedNode == null) continue;
             chunk.setStorageNodeId(assignedNode);
             repo.save(chunk);
             resultDtos.add(toDtoWithNodeUrl(chunk));
@@ -87,6 +94,6 @@ public class ChunkService {
             resultDtos.add(toDtoWithNodeUrl(replica));
         }
 
-        return resultDtos;
+        return resultDtos.isEmpty() ? null : resultDtos;
     }
 }

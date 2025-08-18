@@ -27,9 +27,16 @@ public class ChunkController {
         this.nodeCleanupService = nodeCleanupService;
     }
 
+    /**
+     * POST endpoint to upload a chunk.
+     * Returns a list of all replicas for the given chunk.
+     */
     @PostMapping
     public ResponseEntity<List<ChunkMetadataDTO>> uploadChunk(@RequestBody ChunkMetadataDTO chunkDto) {
         List<ChunkMetadataDTO> resultDtos = chunkService.replicateChunk(chunkDto);
+        if (resultDtos == null) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(resultDtos);
     }
 
@@ -37,14 +44,14 @@ public class ChunkController {
     public ResponseEntity<ChunkMetadataDTO> getChunk(@PathVariable String chunkChecksum) {
         List<ChunkMetadata> replicas = chunkRepo.findByChecksum(chunkChecksum);
         if (replicas.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         }
 
         ChunkMetadata liveReplica = nodeCleanupService.findLiveReplica(replicas);
         if (liveReplica != null) {
             return ResponseEntity.ok(chunkService.toDtoWithNodeUrl(liveReplica));
         }
-        return ResponseEntity.status(404).build();
+        return ResponseEntity.notFound().build();
     }
 
     @PatchMapping("/{id}/status")
@@ -54,7 +61,11 @@ public class ChunkController {
         if (status == null) {
             return ResponseEntity.badRequest().build();
         }
-        chunkService.updateStatus(id, status);
+        try {
+            chunkService.updateStatus(id, status);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
         return ResponseEntity.ok().build();
     }
 }

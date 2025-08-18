@@ -23,9 +23,10 @@ public class FileService {
 
     public FileMetadata storeFile(MultipartFile file, int chunkCount) throws IOException {
         String checksum = ChecksumUtils.computeChecksum(file.getBytes());
-
+        String fileName = file.getOriginalFilename() != null ?
+                file.getOriginalFilename() : "unknown";
         FileMetadata metadata = new FileMetadata(
-            file.getOriginalFilename(),
+            fileName,
             file.getSize(),
             chunkCount,
             checksum
@@ -34,13 +35,19 @@ public class FileService {
     }
 
     public FileMetadata retrieveFile(UUID id) {
-        return repo.findById(id).orElseThrow();
+        return repo.findById(id).orElse(null);
     }
 
     public void updateStatus(UUID id, StorageStatus status) {
-        FileMetadata file = repo.findById(id).orElseThrow();
-        file.setStatus(status);
-        repo.save(file);
+        try {
+            FileMetadata file = repo.findById(id).orElse(null);
+            if (file != null) {
+                file.setStatus(status);
+                repo.save(file);
+            }
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     public Page<FileMetadata> getAllFiles(Pageable pageable) {
