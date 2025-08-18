@@ -9,8 +9,10 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ChunkMetadataDTO {
     private UUID id;
+    @NotNull
     private Integer chunkIndex;
     private String nodeUrl;
+    @NotNull
     private String checksum;
     @NotNull
     private UUID fileId;

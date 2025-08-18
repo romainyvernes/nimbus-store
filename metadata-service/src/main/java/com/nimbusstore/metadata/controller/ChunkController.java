@@ -30,9 +30,28 @@ public class ChunkController {
     /**
      * POST endpoint to upload a chunk.
      * Returns a list of all replicas for the given chunk.
+     * Only checksum, chunkIndex, and fileId are included in the body chunkDto.
      */
     @PostMapping
-    public ResponseEntity<List<ChunkMetadataDTO>> uploadChunk(@RequestBody ChunkMetadataDTO chunkDto) {
+    public ResponseEntity<List<ChunkMetadataDTO>> uploadChunk(@RequestBody Map<String, Object> payload) {
+        // Extract only checksum, chunkIndex, and fileId from the request body
+        String checksum = (String) payload.get("checksum");
+        Integer chunkIndex = payload.get("chunkIndex") instanceof Integer
+                ? (Integer) payload.get("chunkIndex")
+                : payload.get("chunkIndex") != null ? Integer.parseInt(payload.get("chunkIndex").toString()) : null;
+        UUID fileId = payload.get("fileId") instanceof UUID
+                ? (UUID) payload.get("fileId")
+                : payload.get("fileId") != null ? UUID.fromString(payload.get("fileId").toString()) : null;
+
+        if (checksum == null || chunkIndex == null || fileId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        ChunkMetadataDTO chunkDto = new ChunkMetadataDTO();
+        chunkDto.setChecksum(checksum);
+        chunkDto.setChunkIndex(chunkIndex);
+        chunkDto.setFileId(fileId);
+
         List<ChunkMetadataDTO> resultDtos = chunkService.replicateChunk(chunkDto);
         if (resultDtos == null) {
             return ResponseEntity.noContent().build();
@@ -44,7 +63,7 @@ public class ChunkController {
     public ResponseEntity<ChunkMetadataDTO> getChunk(@PathVariable String chunkChecksum) {
         List<ChunkMetadata> replicas = chunkRepo.findByChecksum(chunkChecksum);
         if (replicas.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.notFound().build();
         }
 
         ChunkMetadata liveReplica = nodeCleanupService.findLiveReplica(replicas);
