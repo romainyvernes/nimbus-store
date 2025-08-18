@@ -23,7 +23,7 @@
         <module>common-dto</module>
         <module>storage-node-api</module>
         <module>common-utils</module>
-<!--        <module>client-api</module>-->
+        <module>client-api</module>
     </modules>
 
     <properties>
