@@ -16,9 +16,13 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = MetadataApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    classes = MetadataApplication.class,
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = "spring.config.location=classpath:application-test.properties"
+)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class MetadataServiceIntegrationTests {
+class StorageNodeTests {
 
     @Autowired
     private StorageNodeRepository storageNodeRepository;
