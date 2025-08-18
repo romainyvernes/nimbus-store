@@ -14,8 +14,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
-@SpringBootTest
-class StorageNodeApiApplicationTests {
+@SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
+class NodeRegistrationTests {
 
     private static final String NODE_ID_FILE = "node-id.txt";
     private NodeRegistrationService nodeRegistrationService;
@@ -57,9 +57,12 @@ class StorageNodeApiApplicationTests {
     @Test
     void testSameUuidSentInEveryHeartbeat() {
         UUID id = nodeRegistrationService.getNodeId();
-        NodeRegistrationRequestDTO payload1 = new NodeRegistrationRequestDTO(id);
-        NodeRegistrationRequestDTO payload2 = new NodeRegistrationRequestDTO(nodeRegistrationService.getNodeId());
+        String applicationUrl = "http://localhost:9001";
+        NodeRegistrationRequestDTO payload1 = new NodeRegistrationRequestDTO(id, applicationUrl);
+        NodeRegistrationRequestDTO payload2 = new NodeRegistrationRequestDTO(nodeRegistrationService.getNodeId(), applicationUrl);
         assertEquals(payload1.getId(), payload2.getId(), "Same UUID should be sent in every heartbeat");
+        assertEquals(payload1.getUrl(), payload2.getUrl(),
+                "Application URL should match");
     }
 
     @AfterEach
