@@ -95,7 +95,6 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
     "filename": "example.txt",
     "size": 12345,
     "chunkCount": 4,
-    "replicationFactor": 3,
     "status": "PENDING",
     "checksum": "..."
   }
@@ -111,7 +110,6 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
     "filename": "example.txt",
     "size": 12345,
     "chunkCount": 4,
-    "replicationFactor": 3,
     "status": "PENDING",
     "checksum": "..."
   }
@@ -121,10 +119,10 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   *Update file status.*
 
   **Request:**  
-  Query parameter: `status` (e.g., `ARCHIVED`)
+  Query parameter: `status` (e.g., `COMPLETED`)
 
   **Response:**  
-  Returns only an appropriate HTTP status code (e.g., `204 No Content`). The updated entity is not returned.
+  Returns only an appropriate HTTP status code (`200 OK` if updated, `400 Bad Request` if missing status, `404 Not Found` if file not found).
 
 - `GET /files`  
   *Retrieve metadata about all files (paginated).*
@@ -143,7 +141,6 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
         "filename": "example.txt",
         "size": 12345,
         "chunkCount": 4,
-        "replicationFactor": 3,
         "status": "PENDING",
         "checksum": "..."
       }
@@ -155,31 +152,35 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 #### Chunks
 
-- `POST /chunks/file/{fileId}`  
+- `POST /chunks`  
   *Upload a chunk for a file.*
 
-  **Request (DTO):**
+  **Request (JSON):**
   ```json
   {
+    "checksum": "...",
     "chunkIndex": 0,
-    "checksum": "..."
+    "fileId": "uuid"
   }
   ```
 
   **Response (DTO):**
   ```json
-  {
-    "id": "uuid",
-    "chunkIndex": 0,
-    "storageNodeId": "uuid",
-    "checksum": "...",
-    "fileId": "uuid",
-    "status": "PENDING"
-  }
+  [
+    {
+      "id": "uuid",
+      "chunkIndex": 0,
+      "storageNodeId": "uuid",
+      "checksum": "...",
+      "fileId": "uuid",
+      "status": "PENDING"
+    }
+    // ...other replicas...
+  ]
   ```
 
-- `GET /chunks/{id}`  
-  *Retrieve chunk metadata by UUID.*
+- `GET /chunks/{chunkChecksum}`  
+  *Retrieve chunk metadata by checksum.*
 
   **Response (DTO):**
   ```json
@@ -197,15 +198,29 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   *Update chunk status.*
 
   **Request:**  
-  Query parameter: `status` (e.g., `REPLICATED`)
+  Query parameter: `status` (e.g., `COMPLETED`)
 
   **Response:**  
-  Returns only an appropriate HTTP status code (e.g., `204 No Content`). The updated entity is not returned.
+  Returns only an appropriate HTTP status code (`200 OK` if updated, `400 Bad Request` if missing status).
 
 #### Storage Nodes
 
 - `POST /nodes/register`  
-  *Register a new storage node with a provided UUID.*
+  *Register a new storage node with a provided UUID and URL.*
+
+  **Request:**
+  ```json
+  {
+    "id": "uuid",
+    "url": "http://node-url"
+  }
+  ```
+
+  **Response:**  
+  Returns only an appropriate HTTP status code (`200 OK`).
+
+- `POST /nodes/heartbeat`  
+  *Update last heartbeat for a node.*
 
   **Request:**
   ```json
@@ -215,7 +230,7 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   ```
 
   **Response:**  
-  Returns only an appropriate HTTP status code (e.g., `200 OK`).
+  Returns only an appropriate HTTP status code (`200 OK` if updated, `404 Not Found` if node not found).
 
 #### Health Check
 
@@ -243,14 +258,13 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
   *Upload a chunk to the storage node.*
 
   **Request:**  
-  - Query parameter: `id` (UUID of the chunk)
   - Request body: binary chunk data
 
   **Response:**  
-  Returns only an appropriate HTTP status code (e.g., `201 Created`).
+  Returns `201 Created` and the checksum as body if successful.
 
-- `GET /chunks/{chunkId}`  
-  *Retrieve a chunk from the storage node by UUID.*
+- `GET /chunks/{chunkChecksum}`  
+  *Retrieve a chunk from the storage node by checksum.*
 
   **Response:**  
   - Response body: binary chunk data
@@ -260,10 +274,10 @@ Build a fault-tolerant, horizontally scalable file storage system ("mini-S3") th
 
 ### 6.3 Client API
 
-- `POST /files`  
+- `POST /files`
   *Upload a file.*
 
-- `GET /files/{fileId}`  
+- `GET /files/{fileId}`
   *Download a file.*
 
 ---
